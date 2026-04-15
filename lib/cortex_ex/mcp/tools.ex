@@ -1,0 +1,28 @@
+defmodule CortexEx.MCP.Tools do
+  @moduledoc false
+
+  @tool_modules [
+    CortexEx.MCP.Tools.Xref,
+    CortexEx.MCP.Tools.Ecto,
+    CortexEx.MCP.Tools.Routes,
+    CortexEx.MCP.Tools.Contexts,
+    CortexEx.MCP.Tools.Eval,
+    CortexEx.MCP.Tools.Docs
+  ]
+
+  def list_all do
+    Enum.flat_map(@tool_modules, fn mod ->
+      if Code.ensure_loaded?(mod), do: mod.tools(), else: []
+    end)
+  end
+
+  def call(name, arguments) do
+    tool = Enum.find(list_all(), &(&1.name == name))
+
+    if tool do
+      tool.callback.(arguments)
+    else
+      {:error, "Unknown tool: #{name}"}
+    end
+  end
+end

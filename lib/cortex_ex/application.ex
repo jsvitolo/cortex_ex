@@ -1,19 +1,13 @@
 defmodule CortexEx.Application do
-  # See https://hexdocs.pm/elixir/Application.html
-  # for more information on OTP Applications
-  @moduledoc false
-
   use Application
 
   @impl true
   def start(_type, _args) do
     children = [
-      # Starts a worker by calling: CortexEx.Worker.start_link(arg)
-      # {CortexEx.Worker, arg}
+      CortexEx.LoggerBackend,
+      CortexEx.ErrorTracker
     ]
 
-    # See https://hexdocs.pm/elixir/Supervisor.html
-    # for other strategies and supported options
     opts = [strategy: :one_for_one, name: CortexEx.Supervisor]
     Supervisor.start_link(children, opts)
   end

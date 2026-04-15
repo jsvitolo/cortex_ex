@@ -1,18 +1,16 @@
 defmodule CortexEx do
-  @moduledoc """
-  Documentation for `CortexEx`.
-  """
+  @behaviour Plug
 
-  @doc """
-  Hello world.
+  @impl true
+  def init(opts), do: opts
 
-  ## Examples
-
-      iex> CortexEx.hello()
-      :world
-
-  """
-  def hello do
-    :world
+  @impl true
+  def call(%Plug.Conn{path_info: ["cortex_ex" | rest]} = conn, opts) do
+    conn
+    |> Plug.Conn.put_private(:cortex_ex_opts, opts)
+    |> Plug.forward(rest, CortexEx.MCP.Router, [])
+    |> Plug.Conn.halt()
   end
+
+  def call(conn, _opts), do: conn
 end
