@@ -1,7 +1,7 @@
 defmodule CortexEx.MixProject do
   use Mix.Project
 
-  @version "0.2.0"
+  @version "0.3.0"
   @source_url "https://github.com/jsvitolo/cortex_ex"
 
   def project do
@@ -30,6 +30,7 @@ defmodule CortexEx.MixProject do
     [
       {:plug, "~> 1.14"},
       {:jason, "~> 1.4"},
+      {:oban, "~> 2.0", optional: true},
       {:ex_doc, "~> 0.34", only: :dev, runtime: false}
     ]
   end

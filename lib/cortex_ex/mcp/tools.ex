@@ -10,7 +10,10 @@ defmodule CortexEx.MCP.Tools do
     CortexEx.MCP.Tools.Docs,
     CortexEx.MCP.Tools.Errors,
     CortexEx.MCP.Tools.Logs,
-    CortexEx.MCP.Tools.Requests
+    CortexEx.MCP.Tools.Requests,
+    CortexEx.MCP.Tools.Runtime,
+    CortexEx.MCP.Tools.Oban,
+    CortexEx.MCP.Tools.Config
   ]
 
   def list_all do
