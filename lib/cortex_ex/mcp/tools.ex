@@ -7,7 +7,10 @@ defmodule CortexEx.MCP.Tools do
     CortexEx.MCP.Tools.Routes,
     CortexEx.MCP.Tools.Contexts,
     CortexEx.MCP.Tools.Eval,
-    CortexEx.MCP.Tools.Docs
+    CortexEx.MCP.Tools.Docs,
+    CortexEx.MCP.Tools.Errors,
+    CortexEx.MCP.Tools.Logs,
+    CortexEx.MCP.Tools.Requests
   ]
 
   def list_all do

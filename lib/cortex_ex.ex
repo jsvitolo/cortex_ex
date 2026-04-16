@@ -5,12 +5,18 @@ defmodule CortexEx do
   def init(opts), do: opts
 
   @impl true
-  def call(%Plug.Conn{path_info: ["cortex_ex" | rest]} = conn, opts) do
-    conn
-    |> Plug.Conn.put_private(:cortex_ex_opts, opts)
-    |> Plug.forward(rest, CortexEx.MCP.Router, [])
-    |> Plug.Conn.halt()
-  end
+  def call(conn, opts) do
+    conn = CortexEx.RequestTracker.Plug.call(conn, [])
 
-  def call(conn, _opts), do: conn
+    case conn.path_info do
+      ["cortex_ex" | rest] ->
+        conn
+        |> Plug.Conn.put_private(:cortex_ex_opts, opts)
+        |> Plug.forward(rest, CortexEx.MCP.Router, [])
+        |> Plug.Conn.halt()
+
+      _ ->
+        conn
+    end
+  end
 end
