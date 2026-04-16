@@ -1,7 +1,7 @@
 defmodule CortexEx.MixProject do
   use Mix.Project
 
-  @version "0.4.0"
+  @version "0.5.0"
   @source_url "https://github.com/jsvitolo/cortex_ex"
 
   def project do
@@ -21,7 +21,7 @@ defmodule CortexEx.MixProject do
 
   def application do
     [
-      extra_applications: [:logger],
+      extra_applications: [:logger, :inets, :ssl],
       mod: {CortexEx.Application, []}
     ]
   end

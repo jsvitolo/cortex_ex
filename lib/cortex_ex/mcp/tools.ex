@@ -16,7 +16,11 @@ defmodule CortexEx.MCP.Tools do
     CortexEx.MCP.Tools.Config,
     CortexEx.MCP.Tools.Telemetry,
     CortexEx.MCP.Tools.LiveView,
-    CortexEx.MCP.Tools.PubSub
+    CortexEx.MCP.Tools.PubSub,
+    CortexEx.MCP.Tools.Tests,
+    CortexEx.MCP.Tools.CortexBridge,
+    CortexEx.MCP.Tools.Migrations,
+    CortexEx.MCP.Tools.Hex
   ]
 
   def list_all do
