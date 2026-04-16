@@ -6,7 +6,8 @@ defmodule CortexEx.Application do
     children = [
       CortexEx.LoggerBackend,
       CortexEx.ErrorTracker,
-      CortexEx.RequestTracker
+      CortexEx.RequestTracker,
+      CortexEx.TelemetryTracker
     ]
 
     opts = [strategy: :one_for_one, name: CortexEx.Supervisor]

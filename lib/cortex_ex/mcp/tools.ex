@@ -13,7 +13,10 @@ defmodule CortexEx.MCP.Tools do
     CortexEx.MCP.Tools.Requests,
     CortexEx.MCP.Tools.Runtime,
     CortexEx.MCP.Tools.Oban,
-    CortexEx.MCP.Tools.Config
+    CortexEx.MCP.Tools.Config,
+    CortexEx.MCP.Tools.Telemetry,
+    CortexEx.MCP.Tools.LiveView,
+    CortexEx.MCP.Tools.PubSub
   ]
 
   def list_all do
