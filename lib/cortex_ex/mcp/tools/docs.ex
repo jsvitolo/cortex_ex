@@ -5,6 +5,7 @@ defmodule CortexEx.MCP.Tools.Docs do
     [
       %{
         name: "get_docs",
+        access: :read,
         description: """
         Returns the documentation for a given Elixir module or function.
         Works for project modules and dependencies. Uses the exact versions in the project.

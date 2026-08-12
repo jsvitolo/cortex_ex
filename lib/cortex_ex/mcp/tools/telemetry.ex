@@ -5,6 +5,7 @@ defmodule CortexEx.MCP.Tools.Telemetry do
     [
       %{
         name: "telemetry_metrics",
+        access: :read,
         description: """
         Returns recent telemetry events captured by the TelemetryTracker.
         Optionally filter by event name prefix (e.g. "phoenix.endpoint" or "ecto.repo").
@@ -28,6 +29,7 @@ defmodule CortexEx.MCP.Tools.Telemetry do
       },
       %{
         name: "slow_queries",
+        access: :read,
         description: """
         Returns Ecto query events that exceeded the given duration threshold.
         Each entry includes SQL, total duration (ms), source, and params.
@@ -45,6 +47,7 @@ defmodule CortexEx.MCP.Tools.Telemetry do
       },
       %{
         name: "slow_requests",
+        access: :read,
         description: """
         Returns Phoenix endpoint/controller events that exceeded the given duration threshold.
         Each entry includes path, method, status, and duration (ms).

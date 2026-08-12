@@ -5,6 +5,7 @@ defmodule CortexEx.MCP.Tools.Logs do
     [
       %{
         name: "get_logs",
+        access: :read,
         description: """
         Returns filtered application logs. Supports filtering by level, module, grep pattern,
         time window, and request ID. Logs are returned newest-first.
@@ -42,6 +43,7 @@ defmodule CortexEx.MCP.Tools.Logs do
       },
       %{
         name: "get_log_modules",
+        access: :read,
         description: """
         Returns the top 20 modules by log volume. Useful for finding noisy modules
         or understanding which parts of the application log most.
@@ -51,6 +53,7 @@ defmodule CortexEx.MCP.Tools.Logs do
       },
       %{
         name: "clear_logs",
+        access: :write,
         description: "Clears all captured logs from the buffer.",
         inputSchema: %{type: "object", properties: %{}},
         callback: &clear_logs/1

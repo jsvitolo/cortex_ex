@@ -1,7 +1,7 @@
 defmodule CortexEx.MixProject do
   use Mix.Project
 
-  @version "0.5.0"
+  @version "0.6.0"
   @source_url "https://github.com/jsvitolo/cortex_ex"
 
   def project do
@@ -9,6 +9,7 @@ defmodule CortexEx.MixProject do
       app: :cortex_ex,
       version: @version,
       elixir: "~> 1.15",
+      elixirc_paths: elixirc_paths(Mix.env()),
       start_permanent: false,
       deps: deps(),
       name: "CortexEx",
@@ -26,10 +27,15 @@ defmodule CortexEx.MixProject do
     ]
   end
 
+  defp elixirc_paths(:test), do: ["lib", "test/support"]
+  defp elixirc_paths(_), do: ["lib"]
+
   defp deps do
     [
       {:plug, "~> 1.14"},
       {:jason, "~> 1.4"},
+      {:joken, "~> 2.6"},
+      {:ecto_sql, "~> 3.10", optional: true},
       {:oban, "~> 2.0", optional: true},
       {:telemetry, "~> 1.0", optional: true},
       {:phoenix_live_view, "~> 1.0", optional: true},

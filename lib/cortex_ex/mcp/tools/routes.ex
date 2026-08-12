@@ -5,6 +5,7 @@ defmodule CortexEx.MCP.Tools.Routes do
     [
       %{
         name: "routes",
+        access: :read,
         description: """
         Lists all Phoenix routes with HTTP method, path, controller/live_view, action, and pipe_through pipelines.
         Equivalent to `mix phx.routes` but as a structured MCP tool.

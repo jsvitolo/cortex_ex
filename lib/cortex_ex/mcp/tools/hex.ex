@@ -7,6 +7,7 @@ defmodule CortexEx.MCP.Tools.Hex do
     [
       %{
         name: "search_hex_docs",
+        access: :read,
         description: """
         Searches the HexDocs documentation index (https://search.hexdocs.pm/)
         for the given query. By default, results are filtered to packages present

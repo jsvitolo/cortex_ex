@@ -1,3 +1,33 @@
+# Compiled only when Ecto is present — `from/2` is a macro, so the query
+# cannot live in the main module without a hard compile-time Ecto dependency.
+if Code.ensure_loaded?(Ecto.Query) do
+  defmodule CortexEx.MCP.Tools.Oban.FailedJobsQuery do
+    @moduledoc false
+
+    import Ecto.Query, only: [from: 2]
+
+    def run(repo, schema, limit) do
+      from(j in schema,
+        where: j.state in ["discarded", "retryable"],
+        order_by: [desc: j.attempted_at],
+        limit: ^limit,
+        select: %{
+          id: j.id,
+          worker: j.worker,
+          queue: j.queue,
+          args: j.args,
+          errors: j.errors,
+          state: j.state,
+          attempted_at: j.attempted_at,
+          attempt: j.attempt,
+          max_attempts: j.max_attempts
+        }
+      )
+      |> repo.all()
+    end
+  end
+end
+
 defmodule CortexEx.MCP.Tools.Oban do
   @moduledoc false
 
@@ -6,6 +36,7 @@ defmodule CortexEx.MCP.Tools.Oban do
       [
         %{
           name: "oban_queues",
+          access: :read,
           description: """
           Lists configured Oban queues with their concurrency limits.
           Only available when Oban is installed and configured in the host application.
@@ -15,6 +46,7 @@ defmodule CortexEx.MCP.Tools.Oban do
         },
         %{
           name: "oban_workers",
+          access: :read,
           description: """
           Lists Oban worker modules found in the project.
           Detects modules that implement the Oban.Worker behaviour (have a perform/1 function).
@@ -24,6 +56,7 @@ defmodule CortexEx.MCP.Tools.Oban do
         },
         %{
           name: "failed_jobs",
+          access: :read,
           description: """
           Returns recently failed/discarded Oban jobs with error details.
           Includes: id, worker, queue, args, errors, and attempted_at timestamp.
@@ -41,6 +74,7 @@ defmodule CortexEx.MCP.Tools.Oban do
         },
         %{
           name: "retry_job",
+          access: :write,
           description: """
           Retries a failed Oban job by its ID. The job will be re-enqueued for processing.
           """,
@@ -129,26 +163,9 @@ defmodule CortexEx.MCP.Tools.Oban do
         limit = Map.get(args, "limit", 20)
         repo = get_repo()
 
-        import Ecto.Query, only: [from: 2]
-
         jobs =
-          from(j in oban_job_schema(),
-            where: j.state in ["discarded", "retryable"],
-            order_by: [desc: j.attempted_at],
-            limit: ^limit,
-            select: %{
-              id: j.id,
-              worker: j.worker,
-              queue: j.queue,
-              args: j.args,
-              errors: j.errors,
-              state: j.state,
-              attempted_at: j.attempted_at,
-              attempt: j.attempt,
-              max_attempts: j.max_attempts
-            }
-          )
-          |> repo.all()
+          CortexEx.MCP.Tools.Oban.FailedJobsQuery
+          |> apply(:run, [repo, oban_job_schema(), limit])
           |> Enum.map(fn job ->
             Map.update(job, :attempted_at, nil, fn
               nil -> nil

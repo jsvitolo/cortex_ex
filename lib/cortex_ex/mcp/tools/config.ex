@@ -5,6 +5,7 @@ defmodule CortexEx.MCP.Tools.Config do
     [
       %{
         name: "app_config",
+        access: :read,
         description: """
         Returns application configuration for an OTP app.
         Sensitive values (password, secret, token, key) are automatically masked.
@@ -23,6 +24,7 @@ defmodule CortexEx.MCP.Tools.Config do
       },
       %{
         name: "list_apps",
+        access: :read,
         description: """
         Lists all loaded OTP applications with their description and version.
         Useful for understanding what libraries and applications are running.

@@ -5,6 +5,7 @@ defmodule CortexEx.MCP.Tools.CortexBridge do
     [
       %{
         name: "save_to_cortex_memory",
+        access: :read,
         description: """
         Formats a memory payload for Cortex.
         Returns a JSON structure the agent can pass directly to
@@ -33,6 +34,7 @@ defmodule CortexEx.MCP.Tools.CortexBridge do
       },
       %{
         name: "sync_errors_to_memory",
+        access: :read,
         description: """
         Collects recent frequent errors (count >= 3) from the ErrorTracker
         and formats them as anti_pattern memories ready to be saved to Cortex.

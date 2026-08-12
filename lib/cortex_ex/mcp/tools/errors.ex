@@ -5,6 +5,7 @@ defmodule CortexEx.MCP.Tools.Errors do
     [
       %{
         name: "get_errors",
+        access: :read,
         description: """
         Returns recent captured exceptions with stacktraces, grouped by type.
         Errors are deduplicated — recurring identical errors show a count instead of duplicates.
@@ -22,6 +23,7 @@ defmodule CortexEx.MCP.Tools.Errors do
       },
       %{
         name: "get_error_detail",
+        access: :read,
         description: """
         Returns full detail of a specific error by ID, including the complete stacktrace and context.
         """,
@@ -39,6 +41,7 @@ defmodule CortexEx.MCP.Tools.Errors do
       },
       %{
         name: "get_error_frequency",
+        access: :read,
         description: """
         Returns error frequency grouped by exception type + module + function.
         Useful for finding the most common errors. Optionally filter by module.
@@ -56,6 +59,7 @@ defmodule CortexEx.MCP.Tools.Errors do
       },
       %{
         name: "clear_errors",
+        access: :write,
         description: "Clears all captured errors from the buffer.",
         inputSchema: %{type: "object", properties: %{}},
         callback: &clear_errors/1

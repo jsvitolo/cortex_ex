@@ -2,13 +2,14 @@ defmodule CortexEx.MCP.Router do
   use Plug.Router
 
   plug :match
+  plug CortexEx.Auth.Plug
   plug Plug.Parsers, parsers: [:json], json_decoder: Jason
   plug :dispatch
 
   # MCP initialize
   post "/mcp" do
     body = conn.body_params
-    response = CortexEx.MCP.Server.handle_request(body)
+    response = CortexEx.MCP.Server.handle_request(body, conn.assigns[:cortex_ex_identity])
 
     conn
     |> put_resp_content_type("application/json")

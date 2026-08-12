@@ -5,6 +5,7 @@ defmodule CortexEx.MCP.Tools.Runtime do
     [
       %{
         name: "supervision_tree",
+        access: :read,
         description: """
         Returns the supervision tree of the running application as nested JSON.
         For each process: name, module, pid, status (alive/dead), and child count.
@@ -24,6 +25,7 @@ defmodule CortexEx.MCP.Tools.Runtime do
       },
       %{
         name: "process_info",
+        access: :read,
         description: """
         Returns detailed information about a specific process by PID string.
         Includes: current_function, message_queue_len, memory, status, registered_name, links.
@@ -43,6 +45,7 @@ defmodule CortexEx.MCP.Tools.Runtime do
       },
       %{
         name: "genserver_state",
+        access: :read,
         description: """
         Returns the internal state of a running GenServer by registered name or module name.
         Uses :sys.get_state/2 with a timeout. State is inspected and truncated if large.
@@ -66,6 +69,7 @@ defmodule CortexEx.MCP.Tools.Runtime do
       },
       %{
         name: "ets_tables",
+        access: :read,
         description: """
         Lists all ETS tables in the system with metadata:
         name, type, size (number of objects), memory (words), owner PID, and protection level.
@@ -75,6 +79,7 @@ defmodule CortexEx.MCP.Tools.Runtime do
       },
       %{
         name: "ets_lookup",
+        access: :read,
         description: """
         Looks up a key in a named ETS table and returns the matching entries.
         The key is matched as a string or atom depending on what the table uses.
@@ -97,6 +102,7 @@ defmodule CortexEx.MCP.Tools.Runtime do
       },
       %{
         name: "get_config",
+        access: :read,
         description: """
         Returns application configuration for an OTP app.
         If a key is provided, returns only that specific config value.

@@ -27,15 +27,33 @@ defmodule CortexEx.MCP.Tools do
     Enum.flat_map(@tool_modules, fn mod ->
       if Code.ensure_loaded?(mod), do: mod.tools(), else: []
     end)
+    # Tools without an explicit access level are treated as :write (fail closed).
+    |> Enum.map(&Map.put_new(&1, :access, :write))
   end
 
-  def call(name, arguments) do
-    tool = Enum.find(list_all(), &(&1.name == name))
+  @doc "Tools visible to a caller with the given permissions."
+  def list_for(permissions) do
+    Enum.filter(list_all(), &allowed?(permissions, &1.access))
+  end
 
-    if tool do
-      tool.callback.(arguments)
-    else
-      {:error, "Unknown tool: #{name}"}
+  def call(name, arguments), do: call(name, arguments, :admin)
+
+  def call(name, arguments, permissions) do
+    case Enum.find(list_all(), &(&1.name == name)) do
+      nil ->
+        {:error, "Unknown tool: #{name}"}
+
+      tool ->
+        if allowed?(permissions, tool.access) do
+          tool.callback.(arguments)
+        else
+          {:error, :forbidden}
+        end
     end
   end
+
+  defp allowed?(:admin, _access), do: true
+  defp allowed?({:member, _}, :read), do: true
+  defp allowed?({:member, can_write}, :write), do: can_write
+  defp allowed?(_, _), do: false
 end

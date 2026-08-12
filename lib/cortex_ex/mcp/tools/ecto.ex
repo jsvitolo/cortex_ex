@@ -6,6 +6,7 @@ defmodule CortexEx.MCP.Tools.Ecto do
       [
         %{
           name: "ecto_schemas",
+          access: :read,
           description: """
           Lists all Ecto schema modules with their fields, types, and associations.
           Returns detailed schema information including field types, primary keys,

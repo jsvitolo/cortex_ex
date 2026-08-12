@@ -5,6 +5,7 @@ defmodule CortexEx.MCP.Tools.Tests do
     [
       %{
         name: "run_impacted_tests",
+        access: :write,
         description: """
         Runs the test files that correspond to the given changed files.
         For each file like `lib/foo/bar.ex`, attempts to find and run
@@ -26,6 +27,7 @@ defmodule CortexEx.MCP.Tools.Tests do
       },
       %{
         name: "run_stale_tests",
+        access: :write,
         description: """
         Runs `mix test --stale` which uses the Elixir compiler's stale
         detection to run only tests affected by recent changes.

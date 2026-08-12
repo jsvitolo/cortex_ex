@@ -6,6 +6,7 @@ defmodule CortexEx.MCP.Tools.LiveView do
       [
         %{
           name: "live_views",
+          access: :read,
           description: """
           Lists all active Phoenix.LiveView processes.
           Each entry includes: pid, module, assigns_keys (list of assign names), and connected_at.
@@ -16,6 +17,7 @@ defmodule CortexEx.MCP.Tools.LiveView do
         },
         %{
           name: "live_view_assigns",
+          access: :read,
           description: """
           Returns the assigns of a specific LiveView process by PID.
           Large values are truncated. Only available when Phoenix.LiveView is loaded.

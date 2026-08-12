@@ -5,6 +5,7 @@ defmodule CortexEx.MCP.Tools.Contexts do
     [
       %{
         name: "contexts",
+        access: :read,
         description: """
         Lists Phoenix contexts (business logic modules) with their public functions and associated schemas.
         Contexts are detected by convention: modules in lib/app_name/ that are not controllers, views, channels, or schemas.

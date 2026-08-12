@@ -5,6 +5,7 @@ defmodule CortexEx.MCP.Tools.Eval do
     [
       %{
         name: "project_eval",
+        access: :write,
         description: """
         Evaluates Elixir code in the context of the running project.
         Has access to all project modules, dependencies, and runtime state.

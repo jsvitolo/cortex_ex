@@ -6,6 +6,7 @@ defmodule CortexEx.MCP.Tools.PubSub do
       [
         %{
           name: "pubsub_topology",
+          access: :read,
           description: """
           Lists Phoenix.PubSub topics with their subscribers.
           Each entry includes: topic, pubsub (server name), subscriber_count, and subscribers (pids).

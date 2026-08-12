@@ -5,6 +5,7 @@ defmodule CortexEx.MCP.Tools.Xref do
     [
       %{
         name: "xref_graph",
+        access: :read,
         description: """
         Returns the cross-reference dependency graph from the Elixir compiler.
         This is 100% accurate -- it knows every module call, including through aliases and macros.
@@ -24,6 +25,7 @@ defmodule CortexEx.MCP.Tools.Xref do
       },
       %{
         name: "xref_callers",
+        access: :read,
         description: """
         Returns all modules/functions that call into the specified module.
         Useful for understanding who depends on a module before changing it.

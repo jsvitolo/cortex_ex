@@ -5,6 +5,7 @@ defmodule CortexEx.MCP.Tools.Requests do
     [
       %{
         name: "get_recent_requests",
+        access: :read,
         description: """
         Returns recent HTTP requests with method, path, status code, and duration.
         Useful for understanding what requests the application is handling and finding slow endpoints.
@@ -22,6 +23,7 @@ defmodule CortexEx.MCP.Tools.Requests do
       },
       %{
         name: "get_request_detail",
+        access: :read,
         description: """
         Returns full detail of a specific request by ID, including params, headers, and timing.
         Sensitive fields (password, token, secret) are automatically filtered.
@@ -40,6 +42,7 @@ defmodule CortexEx.MCP.Tools.Requests do
       },
       %{
         name: "replay_request",
+        access: :read,
         description: """
         Returns a curl command and request info to replay a previous request.
         Useful for debugging — replay the exact request that caused an error.

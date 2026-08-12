@@ -452,7 +452,9 @@ defmodule CortexExV02Test do
       refute result.halted
     end
 
-    test "tracks cortex_ex requests too" do
+    test "does not track cortex_ex requests (MCP bodies must not enter the buffer)" do
+      CortexEx.RequestTracker.clear_requests()
+
       conn =
         Plug.Test.conn(:get, "/cortex_ex/health")
         |> Map.put(:body_params, %{})
@@ -460,8 +462,7 @@ defmodule CortexExV02Test do
       _result = CortexEx.call(conn, [])
       Process.sleep(50)
 
-      requests = CortexEx.RequestTracker.get_recent_requests()
-      assert length(requests) >= 1
+      assert CortexEx.RequestTracker.get_recent_requests() == []
     end
   end
 end

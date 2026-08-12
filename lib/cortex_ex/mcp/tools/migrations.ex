@@ -6,6 +6,7 @@ defmodule CortexEx.MCP.Tools.Migrations do
       [
         %{
           name: "plan_migration",
+          access: :read,
           description: """
           Given an Ecto schema module, returns a suggested migration template
           that creates the corresponding table with the schema's fields and types.
