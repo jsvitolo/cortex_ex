@@ -9,7 +9,9 @@ defmodule CortexEx do
   @impl true
   def call(conn, opts) do
     cond do
-      match?(["cortex_ex" | _], conn.path_info) ->
+      # Only the paths this plug owns are forwarded; anything else under
+      # /cortex_ex (e.g. the admin LiveView) belongs to the host router.
+      match?(["cortex_ex", owned | _] when owned in ["mcp", "health"], conn.path_info) ->
         ["cortex_ex" | rest] = conn.path_info
 
         conn
@@ -22,6 +24,11 @@ defmodule CortexEx do
         |> Plug.Conn.put_resp_content_type("application/json")
         |> Plug.Conn.send_resp(200, Jason.encode!(Auth.resource_metadata()))
         |> Plug.Conn.halt()
+
+      # Other /cortex_ex paths (admin UI) fall through to the host router,
+      # skipping request tracking like the rest of the cortex_ex namespace.
+      match?(["cortex_ex" | _], conn.path_info) ->
+        conn
 
       true ->
         # Track only host-app requests — MCP request bodies (tool args,

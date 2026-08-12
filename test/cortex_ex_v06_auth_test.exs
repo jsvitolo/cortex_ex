@@ -30,6 +30,15 @@ defmodule CortexExV06AuthTest do
       # Falls through to the host app (not halted by CortexEx)
       refute result.halted
     end
+
+    test "unowned /cortex_ex paths fall through to the host router" do
+      # e.g. the admin LiveView mounted at /cortex_ex/admin by the host
+      conn = Plug.Test.conn(:get, "/cortex_ex/admin")
+      result = CortexEx.call(conn, [])
+
+      refute result.halted
+      assert result.status == nil
+    end
   end
 
   describe "auth enabled" do

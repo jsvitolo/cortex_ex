@@ -25,7 +25,7 @@ if Code.ensure_loaded?(Phoenix.LiveView) do
 
     defmacro cortex_ex_admin(path) do
       quote do
-        import Phoenix.LiveView.Router, only: [live: 4, live_session: 3]
+        import Phoenix.LiveView.Router, only: [live: 3, live_session: 3]
 
         live_session :cortex_ex_admin, session: {CortexEx.Router, :__session__, []} do
           live unquote(path), CortexEx.AdminLive, :index
