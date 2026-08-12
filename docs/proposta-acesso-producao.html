@@ -1,0 +1,689 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>cortex_ex em produção — proposta de acesso auditado</title>
+<style>
+  :root {
+    --ground: #fafafc;
+    --surface: #ffffff;
+    --ink: #1c1d26;
+    --muted: #62647a;
+    --faint: #8b8da3;
+    --line: #e3e4ec;
+    --accent: #4a43ae;
+    --accent-soft: #edecfa;
+    --ok: #17724a;
+    --ok-soft: #e7f4ed;
+    --deny: #a92531;
+    --deny-soft: #faeceb;
+    --warn: #8a5a10;
+    --warn-soft: #faf3e4;
+    --term-bg: #211f33;
+    --term-ink: #d6d4ea;
+    --mono: "SF Mono", ui-monospace, "JetBrains Mono", Menlo, Consolas, monospace;
+    --sans: "Avenir Next", "Helvetica Neue", system-ui, -apple-system, "Segoe UI", sans-serif;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --ground: #16171e;
+      --surface: #1e2029;
+      --ink: #e8e8f0;
+      --muted: #a2a4ba;
+      --faint: #787a90;
+      --line: #2c2e3c;
+      --accent: #a49df5;
+      --accent-soft: #272547;
+      --ok: #5fc394;
+      --ok-soft: #1c2f26;
+      --deny: #e77f88;
+      --deny-soft: #362024;
+      --warn: #d9a75a;
+      --warn-soft: #322a1b;
+      --term-bg: #12111c;
+      --term-ink: #c9c7e0;
+    }
+  }
+  :root[data-theme="light"] {
+    --ground: #fafafc;
+    --surface: #ffffff;
+    --ink: #1c1d26;
+    --muted: #62647a;
+    --faint: #8b8da3;
+    --line: #e3e4ec;
+    --accent: #4a43ae;
+    --accent-soft: #edecfa;
+    --ok: #17724a;
+    --ok-soft: #e7f4ed;
+    --deny: #a92531;
+    --deny-soft: #faeceb;
+    --warn: #8a5a10;
+    --warn-soft: #faf3e4;
+    --term-bg: #211f33;
+    --term-ink: #d6d4ea;
+  }
+  :root[data-theme="dark"] {
+    --ground: #16171e;
+    --surface: #1e2029;
+    --ink: #e8e8f0;
+    --muted: #a2a4ba;
+    --faint: #787a90;
+    --line: #2c2e3c;
+    --accent: #a49df5;
+    --accent-soft: #272547;
+    --ok: #5fc394;
+    --ok-soft: #1c2f26;
+    --deny: #e77f88;
+    --deny-soft: #362024;
+    --warn: #d9a75a;
+    --warn-soft: #322a1b;
+    --term-bg: #12111c;
+    --term-ink: #c9c7e0;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--ground);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-size: 16px;
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .page {
+    max-width: 880px;
+    margin: 0 auto;
+    padding: 4rem 1.5rem 6rem;
+    display: flex;
+    flex-direction: column;
+    gap: 4.5rem;
+  }
+
+  /* ── typography ── */
+  .eyebrow {
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin: 0 0 0.75rem;
+  }
+
+  h1 {
+    font-size: clamp(1.9rem, 4.5vw, 2.7rem);
+    line-height: 1.15;
+    font-weight: 600;
+    letter-spacing: -0.015em;
+    margin: 0 0 1rem;
+    text-wrap: balance;
+  }
+
+  h2 {
+    font-size: 1.45rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    line-height: 1.25;
+    margin: 0 0 1rem;
+    text-wrap: balance;
+  }
+
+  h3 {
+    font-size: 1.02rem;
+    font-weight: 600;
+    margin: 0 0 0.4rem;
+  }
+
+  p { margin: 0 0 1rem; max-width: 68ch; }
+  p:last-child { margin-bottom: 0; }
+
+  .lede {
+    font-size: 1.14rem;
+    color: var(--muted);
+    max-width: 62ch;
+  }
+
+  strong { font-weight: 600; }
+
+  code {
+    font-family: var(--mono);
+    font-size: 0.86em;
+    background: var(--accent-soft);
+    padding: 0.1em 0.35em;
+    border-radius: 4px;
+  }
+
+  a { color: var(--accent); }
+  a:focus-visible, button:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+
+  /* ── header ── */
+  header .meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1.5rem;
+    font-family: var(--mono);
+    font-size: 0.75rem;
+    color: var(--faint);
+    letter-spacing: 0.04em;
+    margin-top: 1.5rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--line);
+  }
+
+  /* ── section scaffolding ── */
+  section > .body {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  /* ── problem cards ── */
+  .grid-3 {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1rem;
+  }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 1.25rem 1.25rem 1.1rem;
+  }
+  .card p { font-size: 0.92rem; color: var(--muted); margin: 0; }
+
+  /* ── request flow ── */
+  .flow {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: stretch;
+    gap: 0.5rem;
+  }
+  .flow .step {
+    flex: 1 1 120px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 0.7rem 0.8rem;
+    min-width: 118px;
+  }
+  .flow .step .n {
+    font-family: var(--mono);
+    font-size: 0.68rem;
+    color: var(--faint);
+    display: block;
+    margin-bottom: 0.2rem;
+  }
+  .flow .step .t { font-size: 0.85rem; font-weight: 600; display: block; line-height: 1.3; }
+  .flow .step .d { font-size: 0.76rem; color: var(--muted); line-height: 1.45; display: block; margin-top: 0.2rem; }
+  .flow .step.gate { border-left: 3px solid var(--accent); }
+  .flow .step.final { border-left: 3px solid var(--ok); }
+
+  .fail-note {
+    font-family: var(--mono);
+    font-size: 0.76rem;
+    color: var(--deny);
+    background: var(--deny-soft);
+    border-radius: 6px;
+    padding: 0.55rem 0.9rem;
+    align-self: flex-start;
+  }
+
+  /* ── tool chips ── */
+  .tool-groups { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem; }
+  .tool-box {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 1.1rem 1.2rem;
+  }
+  .tool-box .label {
+    display: flex; align-items: baseline; gap: 0.6rem;
+    margin-bottom: 0.75rem;
+  }
+  .tool-box .label .tag {
+    font-family: var(--mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 0.15rem 0.5rem;
+    border-radius: 99px;
+  }
+  .tag.read { background: var(--ok-soft); color: var(--ok); }
+  .tag.write { background: var(--deny-soft); color: var(--deny); }
+  .tool-box .label .count { font-size: 0.8rem; color: var(--faint); }
+  .chips { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+  .chip {
+    font-family: var(--mono);
+    font-size: 0.74rem;
+    padding: 0.2rem 0.55rem;
+    border-radius: 5px;
+    background: var(--accent-soft);
+    color: var(--ink);
+    white-space: nowrap;
+  }
+  .tool-box.write .chip { background: var(--deny-soft); }
+  .tool-box .note { font-size: 0.82rem; color: var(--muted); margin-top: 0.85rem; }
+
+  /* ── layers ── */
+  .layers { display: flex; flex-direction: column; gap: 0.4rem; }
+  .layer {
+    display: grid;
+    grid-template-columns: 2.2rem 1fr;
+    gap: 0.9rem;
+    align-items: baseline;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+  }
+  .layer .n {
+    font-family: var(--mono);
+    font-size: 0.78rem;
+    color: var(--accent);
+  }
+  .layer .t { font-weight: 600; font-size: 0.92rem; }
+  .layer .d { font-size: 0.84rem; color: var(--muted); }
+
+  /* ── table ── */
+  .table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); }
+  table { border-collapse: collapse; width: 100%; min-width: 560px; }
+  th, td { text-align: left; padding: 0.7rem 1rem; font-size: 0.88rem; vertical-align: top; }
+  thead th {
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--faint);
+    border-bottom: 1px solid var(--line);
+    font-weight: 500;
+  }
+  tbody tr + tr td { border-top: 1px solid var(--line); }
+  td.dim { color: var(--muted); }
+  td .win { color: var(--ok); font-weight: 600; }
+  th.col-feature { width: 22%; }
+
+  /* ── audit sample ── */
+  .term {
+    background: var(--term-bg);
+    color: var(--term-ink);
+    border-radius: 10px;
+    padding: 1rem 1.2rem;
+    overflow-x: auto;
+  }
+  .term pre {
+    margin: 0;
+    font-family: var(--mono);
+    font-size: 0.78rem;
+    line-height: 1.7;
+    font-variant-numeric: tabular-nums;
+  }
+  .term .ok { color: #6fd39e; }
+  .term .deny { color: #f08a93; }
+  .term .cmt { color: #7f7c9e; }
+
+  /* ── limits ── */
+  .limits { display: flex; flex-direction: column; gap: 0.9rem; }
+  .limit {
+    border-left: 3px solid var(--warn);
+    background: var(--warn-soft);
+    border-radius: 0 8px 8px 0;
+    padding: 0.85rem 1.1rem;
+  }
+  .limit h3 { font-size: 0.94rem; }
+  .limit p { font-size: 0.87rem; color: var(--muted); margin: 0; max-width: none; }
+
+  /* ── pilot / asks ── */
+  .pilot {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1rem;
+  }
+  .ask {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-top: 3px solid var(--accent);
+    border-radius: 10px;
+    padding: 1.2rem 1.25rem;
+  }
+  .ask .who {
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 0.5rem;
+  }
+  .ask ul { margin: 0; padding-left: 1.1rem; font-size: 0.88rem; color: var(--muted); }
+  .ask li { margin-bottom: 0.35rem; }
+  .ask li:last-child { margin-bottom: 0; }
+
+  .closing {
+    border-top: 1px solid var(--line);
+    padding-top: 2rem;
+  }
+  .closing p { color: var(--muted); }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { animation: none !important; transition: none !important; }
+  }
+</style>
+
+</head>
+<body>
+<div class="page">
+
+  <header>
+    <p class="eyebrow">Proposta técnica · Segurança &amp; Infra &amp; CTO</p>
+    <h1>Debug em produção sem dar shell no pod</h1>
+    <p class="lede">
+      Proposta: substituir o acesso de desenvolvedores a pods via <code>kubectl exec</code>
+      por um endpoint de diagnóstico embutido na própria aplicação — autenticado com Google SSO,
+      restrito por allowlist, com permissão por ferramenta e <strong>auditoria de cada comando executado</strong>.
+    </p>
+    <div class="meta">
+      <span>autor: jones vitolo</span>
+      <span>agosto/2026</span>
+      <span>status: para discussão</span>
+      <span>base: cortex_ex v0.6 (implementado)</span>
+    </div>
+  </header>
+
+  <section>
+    <p class="eyebrow">1 · O problema</p>
+    <h2>Hoje, debugar em produção significa acesso total</h2>
+    <div class="body">
+      <p>
+        Quando um dev precisa investigar um problema em produção, o caminho é
+        <code>kubectl exec</code> no pod e um remote console do Elixir. Isso cria três problemas
+        que crescem com o tamanho do time:
+      </p>
+      <div class="grid-3">
+        <div class="card">
+          <h3>Tudo ou nada</h3>
+          <p>Quem entra no pod tem shell completo e console com poder de executar qualquer código —
+          não existe “só leitura”. Um typo no console pode derrubar o node.</p>
+        </div>
+        <div class="card">
+          <h3>Auditoria cega</h3>
+          <p>O audit log do Kubernetes registra <em>que</em> houve um exec — não o que foi digitado
+          dentro da sessão. Reconstruir o que alguém fez é impossível.</p>
+        </div>
+        <div class="card">
+          <h3>Credencial pesada</h3>
+          <p>Cada dev com acesso significa kubeconfig, RBAC e VPN de cluster para manter, rotacionar
+          e revogar — uma superfície que só aumenta.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <p class="eyebrow">2 · A proposta</p>
+    <h2>Diagnóstico como serviço da própria aplicação</h2>
+    <div class="body">
+      <p>
+        O <strong>cortex_ex</strong> é uma biblioteca Elixir (desenvolvida internamente, ~40 ferramentas)
+        que embute na aplicação um endpoint de diagnóstico via protocolo MCP. O dev conversa com a
+        aplicação — pela ferramenta de IA que já usa ou por cliente HTTP — e cada chamada passa por
+        uma cadeia de verificações antes de executar. Se qualquer etapa falha, a resposta é negada:
+        o sistema é <strong>fail closed</strong> por construção.
+      </p>
+      <div class="flow">
+        <div class="step">
+          <span class="n">req</span>
+          <span class="t">Dev → HTTPS</span>
+          <span class="d">via Claude ou cliente MCP</span>
+        </div>
+        <div class="step gate">
+          <span class="n">gate 1</span>
+          <span class="t">Token JWT RS256</span>
+          <span class="d">emitido via login Google (OAuth 2.1)</span>
+        </div>
+        <div class="step gate">
+          <span class="n">gate 2</span>
+          <span class="t">Domínio corporativo</span>
+          <span class="d">só e-mails @empresa.com</span>
+        </div>
+        <div class="step gate">
+          <span class="n">gate 3</span>
+          <span class="t">Allowlist</span>
+          <span class="d">e-mail cadastrado individualmente</span>
+        </div>
+        <div class="step gate">
+          <span class="n">gate 4</span>
+          <span class="t">Nível da ferramenta</span>
+          <span class="d">leitura × escrita por usuário</span>
+        </div>
+        <div class="step final">
+          <span class="n">exec</span>
+          <span class="t">Executa + audita</span>
+          <span class="d">quem, o quê, argumentos, resultado</span>
+        </div>
+      </div>
+      <div class="fail-note">qualquer gate falhou → 401/negado + registro no audit</div>
+    </div>
+  </section>
+
+  <section>
+    <p class="eyebrow">3 · O que o dev passa a fazer</p>
+    <h2>35 ferramentas de leitura cobrem o grosso do debugging</h2>
+    <div class="body">
+      <p>
+        A maior parte do que hoje justifica um exec no pod é diagnóstico: ver erros, logs,
+        processos, queries lentas. Tudo isso vira leitura segura — sem shell, sem risco de
+        alterar estado. Escrita é exceção, concedida por usuário.
+      </p>
+      <div class="tool-groups">
+        <div class="tool-box">
+          <div class="label">
+            <span class="tag read">leitura</span>
+            <span class="count">35 ferramentas · acesso padrão</span>
+          </div>
+          <div class="chips">
+            <span class="chip">get_errors</span>
+            <span class="chip">get_logs</span>
+            <span class="chip">slow_queries</span>
+            <span class="chip">slow_requests</span>
+            <span class="chip">supervision_tree</span>
+            <span class="chip">process_info</span>
+            <span class="chip">oban_queues</span>
+            <span class="chip">failed_jobs</span>
+            <span class="chip">live_views</span>
+            <span class="chip">telemetry_metrics</span>
+            <span class="chip">routes</span>
+            <span class="chip">+24</span>
+          </div>
+          <p class="note">Introspecção do runtime: nada aqui altera estado da aplicação.</p>
+        </div>
+        <div class="tool-box write">
+          <div class="label">
+            <span class="tag write">escrita</span>
+            <span class="count">6 ferramentas · concessão individual</span>
+          </div>
+          <div class="chips">
+            <span class="chip">project_eval</span>
+            <span class="chip">retry_job</span>
+            <span class="chip">run_impacted_tests</span>
+            <span class="chip">run_stale_tests</span>
+            <span class="chip">clear_errors</span>
+            <span class="chip">clear_logs</span>
+          </div>
+          <p class="note">Equivalente ao poder do remote console — mas individual, revogável na hora
+          e com cada execução registrada com o código completo.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <p class="eyebrow">4 · Modelo de segurança</p>
+    <h2>Seis camadas independentes, todas fail closed</h2>
+    <div class="body">
+      <div class="layers">
+        <div class="layer"><span class="n">L1</span><div><span class="t">Rede</span> — <span class="d">path exposto em ingress dedicado, atrás de VPN / IP allowlist (decisão da infra)</span></div></div>
+        <div class="layer"><span class="n">L2</span><div><span class="t">Autenticação</span> — <span class="d">JWT RS256 validado contra JWKS do identity provider; algoritmos fracos rejeitados; JWKS fora do ar = acesso negado</span></div></div>
+        <div class="layer"><span class="n">L3</span><div><span class="t">Domínio</span> — <span class="d">restrição no IdP (conexão Google única do workspace) + verificação do domínio do e-mail na aplicação</span></div></div>
+        <div class="layer"><span class="n">L4</span><div><span class="t">Allowlist</span> — <span class="d">e-mail precisa estar cadastrado; remoção vale na requisição seguinte; erro de banco = acesso negado</span></div></div>
+        <div class="layer"><span class="n">L5</span><div><span class="t">Permissão por ferramenta</span> — <span class="d">leitura × escrita verificada duas vezes (na listagem e na execução); ferramenta sem classificação é tratada como escrita</span></div></div>
+        <div class="layer"><span class="n">L6</span><div><span class="t">Auditoria</span> — <span class="d">toda chamada registrada em banco: ator, ferramenta, argumentos, resultado — incluindo tentativas negadas</span></div></div>
+      </div>
+      <div class="term" aria-label="exemplo de registro de auditoria">
+        <pre><span class="cmt"># cortex_ex_audit_log — exemplo real do formato</span>
+2026-08-11 14:32:07  ana@empresa.com     slow_queries    {"threshold_ms": 500}      <span class="ok">ok</span>
+2026-08-11 14:33:41  bruno@empresa.com   project_eval    {"code": "MyApp.Repo..."}  <span class="deny">denied</span>
+2026-08-11 14:35:02  ana@empresa.com     get_errors      {"limit": 20}              <span class="ok">ok</span>
+2026-08-11 14:38:19  carla@empresa.com   retry_job       {"id": 84213}              <span class="ok">ok</span></pre>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <p class="eyebrow">5 · Comparativo</p>
+    <h2>Acesso via pod × acesso via aplicação</h2>
+    <div class="body">
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th class="col-feature">Dimensão</th>
+              <th>kubectl exec + remote console</th>
+              <th>cortex_ex</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Identidade</td>
+              <td class="dim">kubeconfig — compartilhável, rotação manual</td>
+              <td><span class="win">Google SSO individual</span> — a conta que o dev já usa</td>
+            </tr>
+            <tr>
+              <td>Granularidade</td>
+              <td class="dim">shell completo, sem meio-termo</td>
+              <td><span class="win">por ferramenta</span> — leitura × escrita por pessoa</td>
+            </tr>
+            <tr>
+              <td>Auditoria</td>
+              <td class="dim">registra que houve exec; conteúdo da sessão é invisível</td>
+              <td><span class="win">cada comando com argumentos</span>, inclusive os negados</td>
+            </tr>
+            <tr>
+              <td>Revogação</td>
+              <td class="dim">rotacionar credenciais, mexer em RBAC</td>
+              <td><span class="win">remover o e-mail</span> — efetivo na requisição seguinte</td>
+            </tr>
+            <tr>
+              <td>Onboarding de dev</td>
+              <td class="dim">kubeconfig + RBAC + VPN de cluster</td>
+              <td><span class="win">URL + login Google</span></td>
+            </tr>
+            <tr>
+              <td>Alcance</td>
+              <td>pod, node, rede, filesystem — <span class="win">necessário para infra/SRE</span></td>
+              <td class="dim">somente a aplicação (proposital)</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p>
+        A última linha é o ponto central da proposta: <strong>não é substituir o kubectl — é reduzir
+        drasticamente quem precisa dele.</strong> Infra e on-call mantêm acesso ao cluster; devs
+        deixam de precisar.
+      </p>
+    </div>
+  </section>
+
+  <section>
+    <p class="eyebrow">6 · Limites conhecidos</p>
+    <h2>O que essa proposta não resolve</h2>
+    <div class="body">
+      <div class="limits">
+        <div class="limit">
+          <h3>Se a aplicação caiu, a ferramenta caiu junto</h3>
+          <p>Pod em CrashLoop, OOM, app que não sobe: invisíveis para o cortex_ex, porque o endpoint
+          é a própria aplicação. Incidentes de infra continuam sendo território do kubectl — por isso
+          SRE/on-call mantém o acesso atual.</p>
+        </div>
+        <div class="limit">
+          <h3>Múltiplas réplicas respondem individualmente</h3>
+          <p>Buffers de erros e logs são locais de cada pod; atrás do load balancer, chamadas podem
+          cair em réplicas diferentes. A agregação entre nodes é o próximo item do roadmap (v0.7);
+          até lá, o uso indicado é diagnóstico pontual, não visão consolidada.</p>
+        </div>
+        <div class="limit">
+          <h3>Permissão de escrita é poder de root na aplicação</h3>
+          <p>O <code>project_eval</code> executa código arbitrário — auditado, mas não impedido.
+          A proposta trata escrita como break-glass: pouquíssimas pessoas, e evolução planejada para
+          concessão temporária com expiração automática.</p>
+        </div>
+        <div class="limit">
+          <h3>Rate limiting ainda não existe</h3>
+          <p>Está fora do v0.6. Mitigação no piloto: exposição apenas via VPN + volume monitorado
+          pelo próprio audit log.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <p class="eyebrow">7 · Piloto proposto</p>
+    <h2>30 dias, uma aplicação, somente leitura</h2>
+    <div class="body">
+      <p>
+        Escopo mínimo para validar o modelo com risco próximo de zero: <strong>uma aplicação</strong>,
+        todos os participantes em modo leitura (nenhuma permissão de escrita concedida), endpoint
+        acessível apenas via VPN. Ao final, revisão conjunta do audit log com o time de segurança:
+        o que foi usado, por quem, e se algo pediu ajuste.
+      </p>
+      <div class="pilot">
+        <div class="ask">
+          <div class="who">Segurança</div>
+          <ul>
+            <li>Revisar o modelo de seis camadas e o formato do audit</li>
+            <li>Aprovar o piloto read-only</li>
+            <li>Definir critérios de saída do piloto</li>
+          </ul>
+        </div>
+        <div class="ask">
+          <div class="who">Infra</div>
+          <ul>
+            <li>Path dedicado no ingress, restrito à VPN</li>
+            <li>Tenant no identity provider (WorkOS/Auth0) com conexão Google do workspace</li>
+            <li>Rodar a migration das duas tabelas (users + audit)</li>
+          </ul>
+        </div>
+        <div class="ask">
+          <div class="who">CTO</div>
+          <ul>
+            <li>Sponsor do piloto e escolha da aplicação</li>
+            <li>Decidir, ao final, a política de acesso a pods para devs</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="closing">
+    <h2>Resumo em uma frase</h2>
+    <p style="font-size: 1.1rem; max-width: 62ch;">
+      90% dos motivos pelos quais um dev pede exec no pod passam a ser atendidos por um canal
+      autenticado com a conta Google corporativa, restrito por pessoa e por ferramenta, e com
+      <strong>cada comando registrado</strong> — enquanto o acesso ao cluster fica restrito a quem
+      opera o cluster.
+    </p>
+    <p>
+      O código está implementado e testado (v0.6, 163 testes). O custo do piloto é configuração,
+      não desenvolvimento.
+    </p>
+  </section>
+
+</div>
+</body>
+</html>
