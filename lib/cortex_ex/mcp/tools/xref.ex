@@ -101,8 +101,10 @@ defmodule CortexEx.MCP.Tools.Xref do
 
   defp get_xref_calls do
     # Mix.Tasks.Xref.calls/0 is deprecated but still the best programmatic API
-    # available for runtime xref data. Compilation tracers are the future replacement.
-    Mix.Tasks.Xref.calls()
+    # available for runtime xref data. Called via apply/3 so the deprecation
+    # warning does not propagate to every host app that compiles cortex_ex;
+    # the rescue in the callers covers Mix being absent (e.g. in a release).
+    apply(Mix.Tasks.Xref, :calls, [])
   end
 
   defp maybe_filter_caller(calls, nil), do: calls
